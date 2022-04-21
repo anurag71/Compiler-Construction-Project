@@ -1,0 +1,4 @@
+class test{
+	int k;
+}
+\\this is a comment

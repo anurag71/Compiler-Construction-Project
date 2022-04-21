@@ -1,0 +1,334 @@
+import java_cup.runtime.*;
+import java.util.ArrayList;
+
+terminal String CLASS;
+terminal String ID;
+terminal FINAL;
+terminal INT;
+terminal CHAR;
+terminal BOOL;
+terminal FLOAT;
+terminal VOID;
+terminal SEMI;
+terminal IF;
+terminal WHILE;
+terminal READ;
+terminal PRINT;
+terminal PRINTLINE;
+terminal RETURN;
+terminal ELSE;
+terminal QUES;
+terminal COM;
+terminal LEFTBR;
+terminal RIGHTBR;
+terminal LEFTCBR;
+terminal RIGHTCBR;
+terminal LEFTSBR;
+terminal RIGHTSBR;
+terminal String INTLIT, FLOATLIT, CHARLIT, STRINGLIT;
+terminal TRUE;
+terminal FALSE;
+terminal TIMES;
+terminal DIVIDE;
+terminal PLUS;
+terminal MINUS;
+terminal LT;
+terminal GT;
+terminal LEQ;
+terminal GEQ;
+terminal EEQ;
+terminal NEQ;
+terminal AND;
+terminal OR;
+terminal COL;
+terminal ASSIGN;
+terminal INC;
+terminal DEC;
+terminal NOT;
+terminal UNRYPLUS; 
+terminal UNRYMINUS;
+
+/*
+ * this dummy token is necessary, since at least one non-terminal is
+ * required to run cup
+ */
+
+non terminal Program program;
+non terminal Memberdecls memberdecls;
+non terminal Fielddecl fielddecl;
+non terminal Methoddecl methoddecl;
+non terminal Expr optionalexpr;
+non terminal Boolean optionalsemi;
+non terminal Type type;
+non terminal Argdecl argdecl;
+non terminal Stmt stmt;
+non terminal Stmt Ifend;
+non terminal Name name;
+non terminal Expr expr;
+non terminal ArrayList<Fielddecl> fielddecls;
+non terminal ArrayList<Methoddecl> methoddecls;
+non terminal ArrayList<Expr> args;
+non terminal ArrayList<Name> readlist;
+non terminal ArrayList<Expr> printlist;
+non terminal ArrayList<Expr> printlinelist;
+non terminal ArrayList<Argdecl> argdecllist;
+non terminal ArrayList<Argdecl> argdecls;
+non terminal ArrayList<Stmt> stmts;
+
+precedence left ELSE;
+
+// ASSIGN
+precedence left ASSIGN;
+
+// TERNARY
+precedence left QUES;
+
+// EQUALITY
+precedence left OR;
+precedence left AND;
+
+// RELATION
+precedence left NEQ, EEQ;
+precedence left GT, GEQ, LT, LEQ;
+
+// MATH
+precedence left PLUS, MINUS;
+precedence left TIMES, DIVIDE;
+
+// UNARY
+precedence left NOT, PLUS, MINUS;
+
+start with program;
+
+program ::= CLASS ID:id LEFTCBR memberdecls:membdecl RIGHTCBR
+			{: RESULT = new Program(id, membdecl);:}
+			;
+memberdecls ::= fielddecl:fdecl memberdecls:membdecls
+			{: RESULT = new Memberdecls(fdecl, membdecls);:}
+			| 
+			methoddecls:methdecls
+			{: RESULT = new Memberdecls(methdecls);:}
+			;
+fielddecls ::= fielddecl:fdecl fielddecls:fdecls
+			{: fdecls.add(0,fdecl); RESULT = fdecls;:}
+			| 
+			{: RESULT = new ArrayList<Fielddecl>();:}
+			;
+methoddecls ::= methoddecl:methdecl methoddecls:methdecls
+			{: methdecls.add(0,methdecl); RESULT = methdecls;:}
+			|
+			{: RESULT = new ArrayList<Methoddecl>();:}
+			;
+fielddecl ::= FINAL type:tp ID:id optionalexpr:optionalex SEMI
+			{: RESULT = new Fielddecl(tp, id, optionalex, true);:}
+			|       
+			type:tp ID:id optionalexpr:optionalex SEMI
+			{: RESULT = new Fielddecl(tp, id, optionalex, false);:}
+			|       
+			type:tp ID:id LEFTSBR INTLIT:len RIGHTSBR SEMI
+			{: RESULT = new Fielddecl(tp, id, Integer.parseInt(len));:}
+			;
+optionalexpr ::= ASSIGN expr:ex
+			{: RESULT = ex;:}
+			|
+			{: RESULT = null;:}
+			;
+methoddecl ::= type:tp ID:id LEFTBR argdecls:adecls RIGHTBR LEFTCBR fielddecls:fdecls stmts:sts RIGHTCBR optionalsemi:opsemi
+			{: RESULT = new Methoddecl(tp, id, adecls, fdecls, sts, opsemi);:}
+			| 
+			VOID ID:id LEFTBR argdecls:adecls RIGHTBR LEFTCBR fielddecls:fdecls stmts:sts RIGHTCBR optionalsemi:opsemi
+			{: RESULT = new Methoddecl("void", id, adecls, fdecls, sts, opsemi);:}
+			;
+optionalsemi ::= SEMI
+			{: RESULT = true;:}
+			|
+			{: RESULT = false;:}
+			;       
+type ::= INT
+	{: RESULT = new Type("int");:}
+	|       
+	CHAR
+	{: RESULT = new Type("char");:}
+	|       
+	BOOL
+	{: RESULT = new Type("bool");:}
+	| 
+	FLOAT
+	{: RESULT = new Type("float");:}
+	;
+argdecls ::= argdecllist:adecllist
+		{: RESULT = adecllist;:}
+		|
+		{: RESULT = new ArrayList<Argdecl>();:}
+		;
+argdecllist ::= argdecl:adecl COM argdecllist:adecllist
+			{: adecllist.add(0,adecl); RESULT = adecllist;:}
+			|       
+			argdecl:adecl
+			{: ArrayList<Argdecl> argarray = new ArrayList<Argdecl>(); argarray.add(adecl); RESULT = argarray;:}
+			;
+argdecl ::= type:tp ID:id
+		{: RESULT = new Argdecl(tp, id, false);:}
+		|       
+		type:tp ID:id LEFTSBR RIGHTSBR
+		{: RESULT = new Argdecl(tp, id, true);:}
+		;
+stmts ::= stmt:stm stmts:stms
+		{: stms.add(0,stm); RESULT = stms;:}
+		|
+		{: RESULT = new ArrayList<Stmt>();:}
+		;
+stmt ::= IF LEFTBR expr:ex RIGHTBR stmt:stm Ifend:ifendstm
+		{: RESULT = new Stmt(ex, stm, ifendstm);:}
+		|       
+		WHILE LEFTBR expr:ex RIGHTBR stmt:stm
+		{: RESULT = new Stmt(ex, stm); :}
+		|       
+		name:nm ASSIGN expr:ex SEMI
+		{: RESULT = new Stmt(nm, ex);:}
+		|       
+		READ LEFTBR readlist:rdlist RIGHTBR SEMI
+		{: RESULT = new Stmt("read", rdlist);:}
+		| 
+		PRINT LEFTBR printlist:prntlist RIGHTBR SEMI
+		{: RESULT = new Stmt("print", prntlist);:}
+		|       
+		PRINTLINE LEFTBR printlinelist:prntlnlist RIGHTBR SEMI
+		{: RESULT = new Stmt("printline", prntlnlist);:}
+		|       
+		ID:id LEFTBR RIGHTBR SEMI
+		{: RESULT = new Stmt(id);:}
+		|       
+		ID:id LEFTBR args:ags RIGHTBR SEMI
+		{: RESULT = new Stmt(id, ags, true);:}
+		| 
+		RETURN SEMI
+		{: RESULT = new Stmt();:}
+		| 
+		RETURN expr:ex SEMI
+		{: RESULT = new Stmt(ex);:}
+		|       
+		name:nm INC SEMI
+		{: RESULT = new Stmt(nm, "++");:}
+		| 
+		name:nm DEC SEMI
+		{: RESULT = new Stmt(nm, "--");:}
+		| 
+		LEFTCBR fielddecls:fdecls stmts:stms RIGHTCBR optionalsemi:opsemi
+		{: RESULT = new Stmt(fdecls, stms, opsemi);:}
+		;
+Ifend ::= ELSE stmt:stm
+		{: RESULT = stm;:}
+		|
+		{: RESULT = null;:}
+		;
+name ::= ID:id
+	{: RESULT = new Name(id);:}
+	| 
+	ID:id LEFTSBR expr:ex RIGHTSBR
+	{: RESULT = new Name(id, ex);:}
+	;
+args ::= expr:ex COM args:ags
+	{:
+	ags.add(0,ex); RESULT = ags;:}
+	|       
+	expr:ex
+	{: ArrayList<Expr> exarray = new ArrayList<Expr>(); exarray.add(ex); RESULT = exarray;:}
+	;
+readlist ::= name:nm COM readlist:rdlist
+		{: rdlist.add(0,nm); RESULT = rdlist;:}
+		|       
+		name:nm
+		{: ArrayList<Name> nmarray = new ArrayList<Name>(); nmarray.add(nm); RESULT = nmarray;:}
+		;
+printlist ::= expr:ex COM printlist:prntlist
+			{: prntlist.add(0,ex); RESULT = prntlist;:}
+			|       
+			expr:ex
+			{: ArrayList<Expr> exarray = new ArrayList<Expr>(); exarray.add(ex); RESULT = exarray;:}
+			;
+printlinelist ::= printlist:prntlist 
+				{: RESULT = prntlist;:}
+				|
+				{: RESULT = new ArrayList<Expr>(); :}
+				;
+expr ::= name:nm
+	{: RESULT = new Expr(nm);:}
+	|       
+	ID:id LEFTBR RIGHTBR
+	{: RESULT = new Expr(id, true);:}
+	|       
+	ID:id LEFTBR args:args RIGHTBR
+	{: RESULT = new Expr(id, args);:}
+	|       
+	INTLIT:intlt
+	{: RESULT = new Expr(Integer.parseInt(intlt));:}
+	| 
+	CHARLIT:charlt
+	{: RESULT = new Expr(charlt, 'c');:}
+	| 
+	STRINGLIT:stringlt
+	{: RESULT = new Expr(stringlt, 's');:}
+	|       
+	FLOATLIT:floatlt
+	{: RESULT = new Expr(Float.parseFloat(floatlt));:}
+	| TRUE
+	{: RESULT = new Expr(true);:}
+	| 
+	FALSE
+	{: RESULT = new Expr(false);:}
+	| 
+	LEFTBR expr:ex RIGHTBR
+	{: RESULT = new Expr(ex);:}
+	|       
+	NOT expr:ex
+	{: RESULT = new Expr(ex, "~");:}
+	|       
+	MINUS expr:ex 
+	{: RESULT = new Expr(ex, "-");:} %prec UNRYMINUS
+	|       
+	PLUS expr:ex 
+	{: RESULT = new Expr(ex, "+");:} %prec UNRYPLUS
+	|       
+	LEFTBR type:tp RIGHTBR expr:ex
+	{: RESULT = new Expr(tp, ex);:}
+	|       
+	expr:ex1 PLUS expr:ex2
+	{: RESULT = new Expr(ex1, new Binaryop("+"), ex2);:}
+	|       
+	expr:ex1 MINUS expr:ex2
+	{: RESULT = new Expr(ex1, new Binaryop("-"), ex2);:}
+	|       
+	expr:ex1 TIMES expr:ex2
+	{: RESULT = new Expr(ex1, new Binaryop("*"), ex2);:}
+	|       
+	expr:ex1 DIVIDE expr:ex2
+	{: RESULT = new Expr(ex1, new Binaryop("/"), ex2);:}
+	|       
+	expr:ex1 GT expr:ex2
+	{: RESULT = new Expr(ex1, new Binaryop(">"), ex2);:}
+	|       
+	expr:ex1 LT expr:ex2
+	{: RESULT = new Expr(ex1, new Binaryop("<"), ex2);:}
+	|       
+	expr:ex1 GEQ expr:ex2
+	{: RESULT = new Expr(ex1, new Binaryop(">="), ex2);:}
+	|       
+	expr:ex1 LEQ expr:ex2
+	{: RESULT = new Expr(ex1, new Binaryop("<="), ex2);:}
+	|       
+	expr:ex1 EEQ expr:ex2
+	{: RESULT = new Expr(ex1, new Binaryop("=="), ex2);:}
+	|       
+	expr:ex1 NEQ expr:ex2
+	{: RESULT = new Expr(ex1, new Binaryop("<>"), ex2);:}
+	|       
+	expr:ex1 OR expr:ex2
+	{: RESULT = new Expr(ex1, new Binaryop("||"), ex2);:}
+	|       
+	expr:ex1 AND expr:ex2
+	{: RESULT = new Expr(ex1, new Binaryop("&&"), ex2);:}
+	|       
+	LEFTBR expr:ex1 QUES expr:ex2 COL expr:ex3 RIGHTBR
+	{: RESULT = new Expr(ex1, ex2, ex3);:}
+	;
