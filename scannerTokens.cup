@@ -59,7 +59,7 @@ non terminal Fielddecl fielddecl;
 non terminal Methoddecl methoddecl;
 non terminal Expr optionalexpr;
 non terminal Boolean optionalsemi;
-non terminal Type type;
+non terminal Type fieldtype;
 non terminal Argdecl argdecl;
 non terminal Stmt stmt;
 non terminal Stmt Ifend;
@@ -119,13 +119,13 @@ methoddecls ::= methoddecl:methdecl methoddecls:methdecls
 			|
 			{: RESULT = new ArrayList<Methoddecl>();:}
 			;
-fielddecl ::= FINAL type:tp ID:id optionalexpr:optionalex SEMI
+fielddecl ::= FINAL fieldtype:tp ID:id optionalexpr:optionalex SEMI
 			{: RESULT = new Fielddecl(tp, id, optionalex, true);:}
 			|       
-			type:tp ID:id optionalexpr:optionalex SEMI
+			fieldtype:tp ID:id optionalexpr:optionalex SEMI
 			{: RESULT = new Fielddecl(tp, id, optionalex, false);:}
 			|       
-			type:tp ID:id LEFTSBR INTLIT:len RIGHTSBR SEMI
+			fieldtype:tp ID:id LEFTSBR INTLIT:len RIGHTSBR SEMI
 			{: RESULT = new Fielddecl(tp, id, Integer.parseInt(len));:}
 			;
 optionalexpr ::= ASSIGN expr:ex
@@ -133,7 +133,7 @@ optionalexpr ::= ASSIGN expr:ex
 			|
 			{: RESULT = null;:}
 			;
-methoddecl ::= type:tp ID:id LEFTBR argdecls:adecls RIGHTBR LEFTCBR fielddecls:fdecls stmts:sts RIGHTCBR optionalsemi:opsemi
+methoddecl ::= fieldtype:tp ID:id LEFTBR argdecls:adecls RIGHTBR LEFTCBR fielddecls:fdecls stmts:sts RIGHTCBR optionalsemi:opsemi
 			{: RESULT = new Methoddecl(tp, id, adecls, fdecls, sts, opsemi);:}
 			| 
 			VOID ID:id LEFTBR argdecls:adecls RIGHTBR LEFTCBR fielddecls:fdecls stmts:sts RIGHTCBR optionalsemi:opsemi
@@ -144,7 +144,7 @@ optionalsemi ::= SEMI
 			|
 			{: RESULT = false;:}
 			;       
-type ::= INT
+fieldtype ::= INT
 	{: RESULT = new Type("int");:}
 	|       
 	CHAR
@@ -167,10 +167,10 @@ argdecllist ::= argdecl:adecl COM argdecllist:adecllist
 			argdecl:adecl
 			{: ArrayList<Argdecl> argarray = new ArrayList<Argdecl>(); argarray.add(adecl); RESULT = argarray;:}
 			;
-argdecl ::= type:tp ID:id
+argdecl ::= fieldtype:tp ID:id
 		{: RESULT = new Argdecl(tp, id, false);:}
 		|       
-		type:tp ID:id LEFTSBR RIGHTSBR
+		fieldtype:tp ID:id LEFTSBR RIGHTSBR
 		{: RESULT = new Argdecl(tp, id, true);:}
 		;
 stmts ::= stmt:stm stmts:stms
@@ -290,7 +290,7 @@ expr ::= name:nm
 	PLUS expr:ex 
 	{: RESULT = new Expr(ex, "+");:} %prec UNRYPLUS
 	|       
-	LEFTBR type:tp RIGHTBR expr:ex
+	LEFTBR fieldtype:tp RIGHTBR expr:ex
 	{: RESULT = new Expr(tp, ex);:}
 	|       
 	expr:ex1 PLUS expr:ex2
