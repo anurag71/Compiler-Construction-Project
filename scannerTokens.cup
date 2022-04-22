@@ -59,7 +59,7 @@ non terminal Fielddecl fielddecl;
 non terminal Methoddecl methoddecl;
 non terminal Expr optionalexpr;
 non terminal Boolean optionalsemi;
-non terminal Type fieldtype;
+non terminal FieldType fieldtype;
 non terminal Argdecl argdecl;
 non terminal Stmt stmt;
 non terminal Stmt Ifend;
@@ -96,7 +96,7 @@ precedence left PLUS, MINUS;
 precedence left TIMES, DIVIDE;
 
 // UNARY
-precedence left NOT, PLUS, MINUS;
+precedence left NOT, UNRYPLUS, UNRYMINUS;
 
 start with program;
 
@@ -145,16 +145,16 @@ optionalsemi ::= SEMI
 			{: RESULT = false;:}
 			;       
 fieldtype ::= INT
-	{: RESULT = new Type("int");:}
+	{: RESULT = new FieldType("int");:}
 	|       
 	CHAR
-	{: RESULT = new Type("char");:}
+	{: RESULT = new FieldType("char");:}
 	|       
 	BOOL
-	{: RESULT = new Type("bool");:}
+	{: RESULT = new FieldType("bool");:}
 	| 
 	FLOAT
-	{: RESULT = new Type("float");:}
+	{: RESULT = new FieldType("float");:}
 	;
 argdecls ::= argdecllist:adecllist
 		{: RESULT = adecllist;:}

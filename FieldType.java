@@ -1,7 +1,7 @@
-class Type
+class FieldType
 {
   String tp;
-  public Type(String tp)
+  public FieldType(String tp)
   {
     this.tp = tp;
   }

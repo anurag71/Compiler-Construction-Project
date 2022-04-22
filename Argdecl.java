@@ -1,10 +1,10 @@
 import javax.sound.sampled.LineEvent.Type;
 
 class Argdecl extends Token{
-	Type type; 
+	FieldType type; 
 	String id;
 	boolean isArray;
-	public Argdecl(Type type, String id, boolean isArray) {
+	public Argdecl(FieldType type, String id, boolean isArray) {
 		this.type = type;
 		this.id = id;
 		this.isArray = isArray;

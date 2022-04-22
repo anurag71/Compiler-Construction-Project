@@ -6,7 +6,7 @@ class Methoddecl extends Token {
 	ArrayList<Stmt> stms;
 	String type, id;
 	boolean hasSemi;
-	public Methoddecl(Type type, String id, ArrayList<Argdecl> adecls, ArrayList<Fielddecl> fdecls, ArrayList<Stmt> stms, boolean hasSemi) {
+	public Methoddecl(FieldType type, String id, ArrayList<Argdecl> adecls, ArrayList<Fielddecl> fdecls, ArrayList<Stmt> stms, boolean hasSemi) {
 		this.type = type.toString();
 		this.id = id;
 		this.adecls = adecls;

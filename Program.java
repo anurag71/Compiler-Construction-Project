@@ -4,6 +4,7 @@ class Program extends Token {
   public Program(String id, Memberdecls membdecls) {
     this.id = id;
     this.membdecls = membdecls;
+    table = new SymTable();
   }
   public String toString(int spaces) {
     return "class " + id + " {\n" + membdecls.toString(spaces+1) + "}";

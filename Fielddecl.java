@@ -2,19 +2,19 @@ import javax.sound.sampled.LineEvent.Type;
 
 class Fielddecl extends Token {
 	boolean optFinal;
-	Type type;
+	FieldType type;
 	String id;
 	int arrLength;
 	Expr ex;
 	int declType;
-	public Fielddecl(Type type, String id, Expr ex, boolean optFinal) {
+	public Fielddecl(FieldType type, String id, Expr ex, boolean optFinal) {
 		this.type = type;
 		this.id = id;
 		this.ex = ex;
 		this.optFinal = optFinal;
 		declType = 0;
 	}
-	public Fielddecl(Type type, String id, int len) {
+	public Fielddecl(FieldType type, String id, int len) {
 		this.type = type;
 		this.id = id;
 		this.arrLength = len;
